@@ -39,25 +39,59 @@ case "$AUTOBUILD_PLATFORM" in
         
         load_vsvars
 
-		build_sln "client/windows/breakpad_client.sln" "Debug|Win32"
-		build_sln "client/windows/breakpad_client.sln" "Release|Win32"
+        build_sln "client/windows/breakpad_client.sln" "Debug|Win32"
+        build_sln "client/windows/breakpad_client.sln" "Release|Win32"
 
-		build_sln "tools/windows/dump_syms/dump_syms.sln" "Release|Win32"
+        build_sln "tools/windows/dump_syms/dump_syms.sln" "Release|Win32"
 
         mkdir -p "$INCLUDE_DIRECTORY/client/windows/"{common,crash_generation}
         mkdir -p "$INCLUDE_DIRECTORY/common/windows"
         mkdir -p "$INCLUDE_DIRECTORY/google_breakpad/common"
         mkdir -p "$INCLUDE_DIRECTORY/processor"
 
-		cp client/windows/Debug/lib/common.lib "$LIBRARY_DIRECTORY_DEBUG"
-		cp client/windows/Debug/lib/crash_generation_client.lib "$LIBRARY_DIRECTORY_DEBUG"
-		cp client/windows/Debug/lib/crash_generation_server.lib "$LIBRARY_DIRECTORY_DEBUG"
-		cp client/windows/Debug/lib/exception_handler.lib "$LIBRARY_DIRECTORY_DEBUG"
+        cp client/windows/Debug/lib/common.lib "$LIBRARY_DIRECTORY_DEBUG"
+        cp client/windows/Debug/lib/crash_generation_client.lib "$LIBRARY_DIRECTORY_DEBUG"
+        cp client/windows/Debug/lib/crash_generation_server.lib "$LIBRARY_DIRECTORY_DEBUG"
+        cp client/windows/Debug/lib/exception_handler.lib "$LIBRARY_DIRECTORY_DEBUG"
 
-		cp client/windows/Release/lib/common.lib "$LIBRARY_DIRECTORY_RELEASE"
-		cp client/windows/Release/lib/crash_generation_client.lib "$LIBRARY_DIRECTORY_RELEASE"
-		cp client/windows/Release/lib/crash_generation_server.lib "$LIBRARY_DIRECTORY_RELEASE"
-		cp client/windows/Release/lib/exception_handler.lib "$LIBRARY_DIRECTORY_RELEASE"
+        cp client/windows/Release/lib/common.lib "$LIBRARY_DIRECTORY_RELEASE"
+        cp client/windows/Release/lib/crash_generation_client.lib "$LIBRARY_DIRECTORY_RELEASE"
+        cp client/windows/Release/lib/crash_generation_server.lib "$LIBRARY_DIRECTORY_RELEASE"
+        cp client/windows/Release/lib/exception_handler.lib "$LIBRARY_DIRECTORY_RELEASE"
+
+        cp client/windows/handler/exception_handler.h "$INCLUDE_DIRECTORY"
+        cp client/windows/common/*.h "$INCLUDE_DIRECTORY/client/windows/common"
+        cp common/windows/*.h "$INCLUDE_DIRECTORY/common/windows"
+        cp client/windows/crash_generation/*.h "$INCLUDE_DIRECTORY/client/windows/crash_generation"
+        cp google_breakpad/common/*.h "$INCLUDE_DIRECTORY/google_breakpad/common"
+        cp tools/windows/dump_syms/Release/dump_syms.exe "$BINARY_DIRECTORY"
+        cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
+    ;;
+    "windows64")
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2010 client/windows/breakpad_client.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2010 tools/windows/dump_syms/dump_syms.gyp
+        
+        load_vsvars
+
+        build_sln "client/windows/breakpad_client.sln" "Debug|x64"
+        build_sln "client/windows/breakpad_client.sln" "Release|x64"
+
+        build_sln "tools/windows/dump_syms/dump_syms.sln" "Release|x64"
+
+        mkdir -p "$INCLUDE_DIRECTORY/client/windows/"{common,crash_generation}
+        mkdir -p "$INCLUDE_DIRECTORY/common/windows"
+        mkdir -p "$INCLUDE_DIRECTORY/google_breakpad/common"
+        mkdir -p "$INCLUDE_DIRECTORY/processor"
+
+        cp client/windows/Debug/lib/common.lib "$LIBRARY_DIRECTORY_DEBUG"
+        cp client/windows/Debug/lib/crash_generation_client.lib "$LIBRARY_DIRECTORY_DEBUG"
+        cp client/windows/Debug/lib/crash_generation_server.lib "$LIBRARY_DIRECTORY_DEBUG"
+        cp client/windows/Debug/lib/exception_handler.lib "$LIBRARY_DIRECTORY_DEBUG"
+
+        cp client/windows/Release/lib/common.lib "$LIBRARY_DIRECTORY_RELEASE"
+        cp client/windows/Release/lib/crash_generation_client.lib "$LIBRARY_DIRECTORY_RELEASE"
+        cp client/windows/Release/lib/crash_generation_server.lib "$LIBRARY_DIRECTORY_RELEASE"
+        cp client/windows/Release/lib/exception_handler.lib "$LIBRARY_DIRECTORY_RELEASE"
 
         cp client/windows/handler/exception_handler.h "$INCLUDE_DIRECTORY"
         cp client/windows/common/*.h "$INCLUDE_DIRECTORY/client/windows/common"
@@ -113,20 +147,20 @@ case "$AUTOBUILD_PLATFORM" in
         mkdir -p "$INCLUDE_DIRECTORY/client/linux/log"
         mkdir -p "$INCLUDE_DIRECTORY/third_party/lss"
 
-	# replicate breakpad headers
+    # replicate breakpad headers
         cp src/common/*.h "$INCLUDE_DIRECTORY/common"
         cp src/google_breakpad/common/*.h "$INCLUDE_DIRECTORY/google_breakpad/common"
 
-	# no really all of them
+    # no really all of them
         cp src/client/linux/crash_generation/*.h "$INCLUDE_DIRECTORY/client/linux/crash_generation/"
         cp src/client/linux/handler/*.h "$INCLUDE_DIRECTORY/client/linux/handler/"
         cp src/client/linux/minidump_writer/*.h "$INCLUDE_DIRECTORY/client/linux/minidump_writer/"
         cp src/client/linux/log/*.h "$INCLUDE_DIRECTORY/client/linux/log/"
         cp src/third_party/lss/* "$INCLUDE_DIRECTORY/third_party/lss/"
 
-	# and then cherry-pick some so they are found as used by linden
+    # and then cherry-pick some so they are found as used by linden
         cp src/client/linux/handler/*.h "$INCLUDE_DIRECTORY"
-	cp src/common/using_std_string.h "$INCLUDE_DIRECTORY"
+    cp src/common/using_std_string.h "$INCLUDE_DIRECTORY"
         cp src/client/linux/handler/exception_handler.h "$INCLUDE_DIRECTORY"
         cp src/client/linux/handler/exception_handler.h "$INCLUDE_DIRECTORY/google_breakpad/"
         cp src/client/linux/handler/minidump_descriptor.h "$INCLUDE_DIRECTORY"
@@ -135,7 +169,7 @@ case "$AUTOBUILD_PLATFORM" in
         cp src/processor/scoped_ptr.h "$INCLUDE_DIRECTORY/processor/scoped_ptr.h"
         cp src/common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
 
-	# libs and binaries
+    # libs and binaries
         cp -P stage/lib/libbreakpad*.a* "$LIBRARY_DIRECTORY_RELEASE"
         cp src/tools/linux/dump_syms/dump_syms "$BINARY_DIRECTORY"
     ;;
