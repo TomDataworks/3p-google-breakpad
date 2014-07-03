@@ -57,6 +57,11 @@
               <string>default</string>
             </map>
           </map>
+          <key>manifest</key>
+          <array>
+            <string>lib/release/*</string>
+            <string>bin/*</string>
+          </array>
           <key>name</key>
           <string>darwin</string>
         </map>
