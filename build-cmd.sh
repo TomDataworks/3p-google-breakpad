@@ -39,10 +39,10 @@ case "$AUTOBUILD_PLATFORM" in
         
         load_vsvars
 
-		#build_sln "client/windows/breakpad_client.sln" "Debug|Win32"
-		#build_sln "client/windows/breakpad_client.sln" "Release|Win32"
+		build_sln "client/windows/breakpad_client.sln" "Debug|Win32"
+		build_sln "client/windows/breakpad_client.sln" "Release|Win32"
 
-		#build_sln "tools/windows/dump_syms/dump_syms.sln" "Release|Win32"
+		build_sln "tools/windows/dump_syms/dump_syms.sln" "Release|Win32"
 
         mkdir -p "$INCLUDE_DIRECTORY/client/windows/"{common,crash_generation}
         mkdir -p "$INCLUDE_DIRECTORY/common/windows"
@@ -64,7 +64,7 @@ case "$AUTOBUILD_PLATFORM" in
         cp common/windows/*.h "$INCLUDE_DIRECTORY/common/windows"
         cp client/windows/crash_generation/*.h "$INCLUDE_DIRECTORY/client/windows/crash_generation"
         cp google_breakpad/common/*.h "$INCLUDE_DIRECTORY/google_breakpad/common"
-        #cp tools/windows/dump_syms/Release/dump_syms.exe "$BINARY_DIRECTORY"
+        cp tools/windows/dump_syms/Release/dump_syms.exe "$BINARY_DIRECTORY"
         cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
     ;;
     darwin)
