@@ -69,23 +69,20 @@ case "$AUTOBUILD_PLATFORM" in
     ;;
     darwin)
         (
-            cd src/
-	    rm CMakeCache.txt
             cmake -G Xcode CMakeLists.txt
-            xcodebuild -arch i386 -project google_breakpad.xcodeproj -configuration Release
+            xcodebuild -project google_breakpad.xcodeproj -configuration Release
         )
-        xcodebuild -arch i386 -project src/tools/mac/dump_syms/dump_syms.xcodeproj MACOSX_DEPLOYMENT_TARGET=10.6 -configuration Release
+        xcodebuild -project tools/mac/dump_syms/dump_syms.xcodeproj MACOSX_DEPLOYMENT_TARGET=10.7 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 -sdk macosx10.8 -configuration Release
         mkdir -p "$INCLUDE_DIRECTORY/processor"
         mkdir -p "$INCLUDE_DIRECTORY/google_breakpad/common"
         mkdir -p "$INCLUDE_DIRECTORY/client/mac/crash_generation"
         mkdir -p "$INCLUDE_DIRECTORY/client/mac/crash_generation/common/mac"
-        cp ./src/client/mac/handler/exception_handler.h "$INCLUDE_DIRECTORY"
-        cp ./src/client/mac/crash_generation/crash_generation_client.h "$INCLUDE_DIRECTORY/client/mac/crash_generation"
-        cp ./src/common/mac/MachIPC.h "$INCLUDE_DIRECTORY/client/mac/crash_generation/common/mac"
-        cp ./src/client/mac/handler/Release/libexception_handler.dylib "$LIBRARY_DIRECTORY_RELEASE"
-        cp ./src/tools/mac/dump_syms/build/Release/dump_syms "$BINARY_DIRECTORY"
-        cp src/processor/scoped_ptr.h "$INCLUDE_DIRECTORY/processor/scoped_ptr.h"
-        cp src/common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
+        cp client/mac/handler/exception_handler.h "$INCLUDE_DIRECTORY"
+        cp client/mac/crash_generation/crash_generation_client.h "$INCLUDE_DIRECTORY/client/mac/crash_generation"
+        cp common/mac/MachIPC.h "$INCLUDE_DIRECTORY/client/mac/crash_generation/common/mac"
+        cp client/mac/handler/Release/libexception_handler.dylib "$LIBRARY_DIRECTORY_RELEASE"
+        cp tools/mac/dump_syms/build/Release/dump_syms "$BINARY_DIRECTORY"
+        cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
     ;;
     linux)
         VIEWER_FLAGS="-m32 -fno-stack-protector"
