@@ -91,6 +91,32 @@
           <key>name</key>
           <string>windows</string>
         </map>
+        <key>windows64</key>
+        <map>
+          <key>build_directory</key>
+          <string>stage</string>
+          <key>configurations</key>
+          <map>
+            <key>default</key>
+            <map>
+              <key>build</key>
+              <map>
+              </map>
+              <key>default</key>
+              <string>true</string>
+              <key>name</key>
+              <string>default</string>
+            </map>
+          </map>
+          <key>manifest</key>
+          <array>
+            <string>lib/release/*.lib</string>
+            <string>lib/debug/*.lib</string>
+            <string>bin/*.exe</string>
+          </array>
+          <key>name</key>
+          <string>windows64</string>
+        </map>
       </map>
       <key>version</key>
       <string>1343</string>
