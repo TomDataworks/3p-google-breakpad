@@ -34,8 +34,8 @@ mkdir -p "$INCLUDE_DIRECTORY/common"
 pushd "google-breakpad/src"
 case "$AUTOBUILD_PLATFORM" in
     "windows")
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2010 client/windows/breakpad_client.gyp
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2010 tools/windows/dump_syms/dump_syms.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 client/windows/breakpad_client.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 tools/windows/dump_syms/dump_syms.gyp
         
         load_vsvars
 
