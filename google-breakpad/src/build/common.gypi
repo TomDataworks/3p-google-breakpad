@@ -446,6 +446,7 @@
             'Optimization': '<(win_debug_Optimization)',
             'PreprocessorDefinitions': ['_DEBUG'],
             'BasicRuntimeChecks': '3',
+            'DebugInformationFormat': '1',
             'RuntimeLibrary': '<(win_debug_RuntimeLibrary)',
             'TreatWChar_tAsBuiltInType': '<(win_debug_TreatWChar_tAsBuiltInType)',
           },
@@ -484,6 +485,7 @@
         'msvs_settings': {
           'VCCLCompilerTool': {
             'Optimization': '<(win_release_Optimization)',
+            'DebugInformationFormat': '1',
             'RuntimeLibrary': '<(win_release_RuntimeLibrary)',
             'TreatWChar_tAsBuiltInType': '<(win_release_TreatWChar_tAsBuiltInType)',
           },
