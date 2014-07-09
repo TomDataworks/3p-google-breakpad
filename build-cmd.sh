@@ -68,8 +68,8 @@ case "$AUTOBUILD_PLATFORM" in
         cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
     ;;
     "windows64")
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2010 client/windows/breakpad_client.gyp
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2010 tools/windows/dump_syms/dump_syms.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 client/windows/breakpad_client.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 tools/windows/dump_syms/dump_syms.gyp
         
         load_vsvars
 
