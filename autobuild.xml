@@ -10,7 +10,7 @@
       <key>license_file</key>
       <string>LICENSES/google_breakpad.txt</string>
       <key>name</key>
-      <string>google-breakpad</string>
+      <string>google_breakpad</string>
       <key>platforms</key>
       <map>
         <key>common</key>
