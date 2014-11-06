@@ -1,0 +1,9 @@
+syntax: glob
+autobuild-parabuild-bootstrap/
+stage/
+*.o
+*.d
+*.dia
+*.dylib
+*.hmap
+
