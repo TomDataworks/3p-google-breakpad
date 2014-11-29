@@ -168,7 +168,8 @@ src_libbreakpad_a_SOURCES = \
 	src/google_breakpad/processor/exploitability.h \
 	src/google_breakpad/processor/fast_source_line_resolver.h \
 	src/google_breakpad/processor/memory_region.h \
-        src/google_breakpad/processor/microdump_processor.h \
+	src/google_breakpad/processor/microdump.h \
+	src/google_breakpad/processor/microdump_processor.h \
 	src/google_breakpad/processor/minidump.h \
 	src/google_breakpad/processor/minidump_processor.h \
 	src/google_breakpad/processor/process_result.h \
@@ -211,7 +212,8 @@ src_libbreakpad_a_SOURCES = \
 	src/processor/logging.cc \
 	src/processor/map_serializers-inl.h \
 	src/processor/map_serializers.h \
-        src/processor/microdump_processor.cc \
+	src/processor/microdump.cc \
+	src/processor/microdump_processor.cc \
 	src/processor/minidump.cc \
 	src/processor/minidump_processor.cc \
 	src/processor/module_comparer.cc \
@@ -299,6 +301,7 @@ src_third_party_libdisasm_libdisasm_a_SOURCES = \
 
 ## Programs
 bin_PROGRAMS += \
+	src/processor/microdump_stackwalk \
 	src/processor/minidump_dump \
 	src/processor/minidump_stackwalk
 endif !DISABLE_PROCESSOR
@@ -331,7 +334,7 @@ check_PROGRAMS += \
 	src/processor/exploitability_unittest \
 	src/processor/fast_source_line_resolver_unittest \
 	src/processor/map_serializers_unittest \
-        src/processor/microdump_processor_unittest \
+	src/processor/microdump_processor_unittest \
 	src/processor/minidump_processor_unittest \
 	src/processor/minidump_unittest \
 	src/processor/static_address_map_unittest \
@@ -373,6 +376,8 @@ endif !DISABLE_PROCESSOR
 
 if !DISABLE_PROCESSOR
 check_SCRIPTS = \
+	src/processor/microdump_stackwalk_test \
+	src/processor/microdump_stackwalk_machine_readable_test \
 	src/processor/minidump_dump_test \
 	src/processor/minidump_stackwalk_test \
 	src/processor/minidump_stackwalk_machine_readable_test
@@ -432,6 +437,10 @@ src_client_linux_linux_client_unittest_shlib_SOURCES = \
 if ANDROID_HOST
 src_client_linux_linux_client_unittest_shlib_SOURCES += \
 	src/common/android/breakpad_getcontext.S
+endif
+if LINUX_HOST
+src_client_linux_linux_client_unittest_shlib_SOURCES += \
+	src/client/linux/microdump_writer/microdump_writer_unittest.cc
 endif
 
 src_client_linux_linux_client_unittest_shlib_CPPFLAGS = \
@@ -704,10 +713,10 @@ src_processor_exploitability_unittest_LDADD = \
 	src/processor/stack_frame_cpu.o \
 	src/processor/stack_frame_symbolizer.o \
 	src/processor/stackwalker.o \
+	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_amd64.o \
 	src/processor/stackwalker_arm.o \
 	src/processor/stackwalker_arm64.o \
-	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_mips.o \
 	src/processor/stackwalker_ppc.o \
 	src/processor/stackwalker_ppc64.o \
@@ -771,17 +780,42 @@ src_processor_map_serializers_unittest_LDADD = \
 	$(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 
 src_processor_microdump_processor_unittest_SOURCES = \
-  src/processor/microdump_processor_unittest.cc \
-  src/testing/gtest/src/gtest-all.cc \
-  src/testing/src/gmock-all.cc
+	src/processor/microdump_processor_unittest.cc \
+	src/testing/gtest/src/gtest-all.cc \
+	src/testing/src/gmock-all.cc
 src_processor_microdump_processor_unittest_CPPFLAGS = \
-  -I$(top_srcdir)/src \
-  -I$(top_srcdir)/src/testing/include \
-  -I$(top_srcdir)/src/testing/gtest/include \
-  -I$(top_srcdir)/src/testing/gtest \
-  -I$(top_srcdir)/src/testing
+	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/testing/include \
+	-I$(top_srcdir)/src/testing/gtest/include \
+	-I$(top_srcdir)/src/testing/gtest \
+	-I$(top_srcdir)/src/testing
 src_processor_microdump_processor_unittest_LDADD = \
-  $(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
+	src/processor/basic_code_modules.o \
+	src/processor/basic_source_line_resolver.o \
+	src/processor/call_stack.o \
+	src/processor/cfi_frame_info.o \
+	src/processor/dump_context.o \
+	src/processor/dump_object.o \
+	src/processor/logging.o \
+	src/processor/microdump.o \
+	src/processor/microdump_processor.o \
+	src/processor/pathname_stripper.o \
+	src/processor/process_state.o \
+	src/processor/simple_symbol_supplier.o \
+	src/processor/source_line_resolver_base.o \
+	src/processor/stack_frame_symbolizer.o \
+	src/processor/stackwalker.o \
+	src/processor/stackwalker_address_list.o \
+	src/processor/stackwalker_amd64.o \
+	src/processor/stackwalker_arm.o \
+	src/processor/stackwalker_arm64.o \
+	src/processor/stackwalker_mips.o \
+	src/processor/stackwalker_ppc.o \
+	src/processor/stackwalker_ppc64.o \
+	src/processor/stackwalker_sparc.o \
+	src/processor/stackwalker_x86.o \
+	src/processor/tokenize.o \
+  	$(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 
 src_processor_minidump_processor_unittest_SOURCES = \
 	src/processor/minidump_processor_unittest.cc \
@@ -813,10 +847,10 @@ src_processor_minidump_processor_unittest_LDADD = \
 	src/processor/stack_frame_cpu.o \
 	src/processor/stack_frame_symbolizer.o \
 	src/processor/stackwalker.o \
+	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_amd64.o \
 	src/processor/stackwalker_arm.o \
 	src/processor/stackwalker_arm64.o \
-	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_mips.o \
 	src/processor/stackwalker_ppc.o \
 	src/processor/stackwalker_ppc64.o \
@@ -945,10 +979,10 @@ src_processor_stackwalker_selftest_LDADD = \
 	src/processor/stack_frame_cpu.o \
 	src/processor/stack_frame_symbolizer.o \
 	src/processor/stackwalker.o \
+	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_amd64.o \
 	src/processor/stackwalker_arm.o \
 	src/processor/stackwalker_arm64.o \
-	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_mips.o \
 	src/processor/stackwalker_ppc.o \
 	src/processor/stackwalker_ppc64.o \
@@ -1099,6 +1133,40 @@ src_processor_minidump_dump_LDADD = \
 	src/processor/minidump.o \
 	src/processor/pathname_stripper.o
 
+src_processor_microdump_stackwalk_SOURCES = \
+	src/processor/microdump_stackwalk.cc
+src_processor_microdump_stackwalk_LDADD = \
+	src/processor/basic_code_modules.o \
+	src/processor/basic_source_line_resolver.o \
+	src/processor/binarystream.o \
+	src/processor/call_stack.o \
+	src/processor/cfi_frame_info.o \
+	src/processor/disassembler_x86.o \
+	src/processor/dump_context.o \
+	src/processor/dump_object.o \
+	src/processor/logging.o \
+	src/processor/microdump.o \
+	src/processor/microdump_processor.o \
+	src/processor/pathname_stripper.o \
+	src/processor/process_state.o \
+	src/processor/simple_symbol_supplier.o \
+	src/processor/source_line_resolver_base.o \
+	src/processor/stack_frame_cpu.o \
+	src/processor/stack_frame_symbolizer.o \
+	src/processor/stackwalk_common.o \
+	src/processor/stackwalker.o \
+	src/processor/stackwalker_address_list.o \
+	src/processor/stackwalker_amd64.o \
+	src/processor/stackwalker_arm.o \
+	src/processor/stackwalker_arm64.o \
+	src/processor/stackwalker_mips.o \
+	src/processor/stackwalker_ppc.o \
+	src/processor/stackwalker_ppc64.o \
+	src/processor/stackwalker_sparc.o \
+	src/processor/stackwalker_x86.o \
+	src/processor/tokenize.o \
+	src/third_party/libdisasm/libdisasm.a
+
 src_processor_minidump_stackwalk_SOURCES = \
 	src/processor/minidump_stackwalk.cc
 src_processor_minidump_stackwalk_LDADD = \
@@ -1122,11 +1190,12 @@ src_processor_minidump_stackwalk_LDADD = \
 	src/processor/source_line_resolver_base.o \
 	src/processor/stack_frame_cpu.o \
 	src/processor/stack_frame_symbolizer.o \
+	src/processor/stackwalk_common.o \
 	src/processor/stackwalker.o \
+	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_amd64.o \
 	src/processor/stackwalker_arm.o \
 	src/processor/stackwalker_arm64.o \
-	src/processor/stackwalker_address_list.o \
 	src/processor/stackwalker_mips.o \
 	src/processor/stackwalker_ppc.o \
 	src/processor/stackwalker_ppc64.o \
