@@ -31,9 +31,10 @@ mkdir -p "$LIBRARY_DIRECTORY_RELEASE"
 mkdir -p "$BINARY_DIRECTORY"
 mkdir -p "$INCLUDE_DIRECTORY"
 mkdir -p "$INCLUDE_DIRECTORY/common"
-pushd "google-breakpad/src"
+pushd "google-breakpad"
 case "$AUTOBUILD_PLATFORM" in
     "windows")
+    pushd "src"
         tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 client/windows/breakpad_client.gyp
         tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 tools/windows/dump_syms/dump_syms.gyp
         
@@ -66,8 +67,10 @@ case "$AUTOBUILD_PLATFORM" in
         cp google_breakpad/common/*.h "$INCLUDE_DIRECTORY/google_breakpad/common"
         cp tools/windows/dump_syms/Release/dump_syms.exe "$BINARY_DIRECTORY"
         cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
+    popd
     ;;
     "windows64")
+    pushd "src"
         tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 client/windows/breakpad_client.gyp
         tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 tools/windows/dump_syms/dump_syms.gyp
         
@@ -100,8 +103,10 @@ case "$AUTOBUILD_PLATFORM" in
         cp google_breakpad/common/*.h "$INCLUDE_DIRECTORY/google_breakpad/common"
         cp tools/windows/dump_syms/Release/dump_syms.exe "$BINARY_DIRECTORY"
         cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
+    popd
     ;;
     darwin)
+    pushd "src"
         (
             cmake -G Xcode CMakeLists.txt
             xcodebuild -project google_breakpad.xcodeproj \
@@ -131,23 +136,15 @@ case "$AUTOBUILD_PLATFORM" in
         cp client/mac/handler/Release/libexception_handler.dylib "$LIBRARY_DIRECTORY_RELEASE"
         cp tools/mac/dump_syms/build/Release/dump_syms "$BINARY_DIRECTORY"
         cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
+    popd
     ;;
-    linux)
-        VIEWER_FLAGS="-m32 -fno-stack-protector"
+    linux64)
+        VIEWER_FLAGS="-m64 -O3 -fno-stack-protector"
 
-        if [ -f /usr/bin/gcc-4.1 ] ; then
-            export CC=gcc-4.1
-        else
-            export CC=gcc
-        fi
-
-        if [ -f /usr/bin/g++-4.1 ] ; then
-            export CXX=g++-4.1
-        else
-            export CXX=g++
-        fi
-
-        ./configure --prefix="$(pwd)/stage" CFLAGS="$VIEWER_FLAGS" CXXFLAGS="$VIEWER_FLAGS" LDFLAGS=-m32
+        CFLAGS="$VIEWER_FLAGS" \
+        CXXFLAGS="$VIEWER_FLAGS -std=gnu++11" \
+        LDFLAGS=-m64 \
+        ./configure --prefix="$stage" --libdir="$stage/lib/release"
         make
         make -C src/tools/linux/dump_syms/ dump_syms
         make install
@@ -157,6 +154,7 @@ case "$AUTOBUILD_PLATFORM" in
         mkdir -p "$INCLUDE_DIRECTORY/google_breakpad/common"
         mkdir -p "$INCLUDE_DIRECTORY/client/linux/handler"
         mkdir -p "$INCLUDE_DIRECTORY/client/linux/crash_generation"
+        mkdir -p "$INCLUDE_DIRECTORY/client/linux/dump_writer_common"
         mkdir -p "$INCLUDE_DIRECTORY/client/linux/minidump_writer"
         mkdir -p "$INCLUDE_DIRECTORY/client/linux/log"
         mkdir -p "$INCLUDE_DIRECTORY/third_party/lss"
@@ -168,6 +166,7 @@ case "$AUTOBUILD_PLATFORM" in
         # no really all of them
         cp src/client/linux/crash_generation/*.h "$INCLUDE_DIRECTORY/client/linux/crash_generation/"
         cp src/client/linux/handler/*.h "$INCLUDE_DIRECTORY/client/linux/handler/"
+        cp src/client/linux/dump_writer_common/*.h "$INCLUDE_DIRECTORY/client/linux/dump_writer_common/"
         cp src/client/linux/minidump_writer/*.h "$INCLUDE_DIRECTORY/client/linux/minidump_writer/"
         cp src/client/linux/log/*.h "$INCLUDE_DIRECTORY/client/linux/log/"
         cp src/third_party/lss/* "$INCLUDE_DIRECTORY/third_party/lss/"
@@ -180,16 +179,13 @@ case "$AUTOBUILD_PLATFORM" in
         cp src/client/linux/handler/minidump_descriptor.h "$INCLUDE_DIRECTORY"
         cp src/client/linux/handler/minidump_descriptor.h "$INCLUDE_DIRECTORY/google_breakpad/"
 
-        cp src/processor/scoped_ptr.h "$INCLUDE_DIRECTORY/processor/scoped_ptr.h"
         cp src/common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
 
         # libs and binaries
-        cp -P stage/lib/libbreakpad*.a* "$LIBRARY_DIRECTORY_RELEASE"
         cp src/tools/linux/dump_syms/dump_syms "$BINARY_DIRECTORY"
     ;;
 esac
 
 mkdir -p $stage/LICENSES
-cp ../LICENSE $stage/LICENSES/google_breakpad.txt
-popd
+cp LICENSE $stage/LICENSES/google_breakpad.txt
 pass
