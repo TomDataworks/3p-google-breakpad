@@ -251,8 +251,10 @@
       'win_release_Optimization%': '2', # 2 = /Os
       'win_debug_Optimization%': '0',   # 0 = /Od
       # See http://msdn.microsoft.com/en-us/library/aa652367(VS.71).aspx
-      'win_release_RuntimeLibrary%': '0', # 0 = /MT (nondebug static)
-      'win_debug_RuntimeLibrary%': '1',   # 1 = /MTd (debug static)
+      'win_release_RuntimeLibrary%': '2', # 2 = /MT (nondebug dll)
+      'win_debug_RuntimeLibrary%': '3',   # 3 = /MTd (debug dll)
+      'win_release_TreatWChar_tAsBuiltInType': 'false',
+      'win_debug_TreatWChar_tAsBuiltInType': 'false',
 
       'release_extra_cflags%': '',
       'debug_extra_cflags%': '',
@@ -328,7 +330,7 @@
         'msvs_disabled_warnings': [4800],
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'WarnAsError': 'true',
+            'WarnAsError': 'false',
             'Detect64BitPortabilityProblems': 'false',
           },
         },
@@ -404,7 +406,9 @@
             'Optimization': '<(win_debug_Optimization)',
             'PreprocessorDefinitions': ['_DEBUG'],
             'BasicRuntimeChecks': '3',
+            'DebugInformationFormat': '1',
             'RuntimeLibrary': '<(win_debug_RuntimeLibrary)',
+            'TreatWChar_tAsBuiltInType': '<(win_debug_TreatWChar_tAsBuiltInType)',
           },
           'VCLinkerTool': {
             'LinkIncremental': '<(msvs_debug_link_incremental)',
@@ -418,6 +422,13 @@
             'cflags': [
               '<@(debug_extra_cflags)',
             ],
+          }],
+          ['win_debug_RuntimeLibrary==3', {
+            # Visual C++ 2008 barfs when building anything with /MD (msvcrt):
+            #  VC\include\typeinfo(139) : warning C4275: non dll-interface
+            #  class 'stdext::exception' used as base for dll-interface
+            #  class 'std::bad_cast'
+            'msvs_disabled_warnings': [4275],
           }],
         ],
       },
@@ -434,7 +445,9 @@
         'msvs_settings': {
           'VCCLCompilerTool': {
             'Optimization': '<(win_release_Optimization)',
+            'DebugInformationFormat': '1',
             'RuntimeLibrary': '<(win_release_RuntimeLibrary)',
+            'TreatWChar_tAsBuiltInType': '<(win_release_TreatWChar_tAsBuiltInType)',
           },
           'VCLinkerTool': {
             'LinkIncremental': '1',
@@ -500,17 +513,17 @@
                 'FavorSizeOrSpeed': '2',
                 'OmitFramePointers': 'true',
                 'EnableFiberSafeOptimizations': 'true',
-                'WholeProgramOptimization': 'true',
+                'WholeProgramOptimization': 'false',
               },
               'VCLibrarianTool': {
-                'AdditionalOptions': ['/ltcg', '/expectedoutputsize:120000000'],
+                'AdditionalOptions': ['/expectedoutputsize:120000000'],
               },
               'VCLinkerTool': {
                 'LinkIncremental': '1',
                 'OptimizeReferences': '2',
                 'EnableCOMDATFolding': '2',
                 'OptimizeForWindows98': '1',
-                'LinkTimeCodeGeneration': '1',
+                'LinkTimeCodeGeneration': '0',
               },
             },
           }],
@@ -904,7 +917,7 @@
             'EnableFunctionLevelLinking': 'true',
             'RuntimeTypeInfo': 'false',
             'WarningLevel': '4',
-            'WarnAsError': 'true',
+            'WarnAsError': 'false',
             'DebugInformationFormat': '3',
             'conditions': [
               [ 'msvs_multi_core_compile', {
