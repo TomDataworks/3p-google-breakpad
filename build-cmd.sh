@@ -21,6 +21,8 @@ set +x
 eval "$("$AUTOBUILD" source_environment)"
 set -x
 
+BREAKPAD_VERSION="1412"
+
 stage="$(pwd)/stage"
 LIBRARY_DIRECTORY_DEBUG=$stage/lib/debug
 LIBRARY_DIRECTORY_RELEASE=$stage/lib/release
@@ -31,6 +33,9 @@ mkdir -p "$LIBRARY_DIRECTORY_RELEASE"
 mkdir -p "$BINARY_DIRECTORY"
 mkdir -p "$INCLUDE_DIRECTORY"
 mkdir -p "$INCLUDE_DIRECTORY/common"
+
+echo "${BREAKPAD_VERSION}" > "${stage}/VERSION.txt"
+
 pushd "google-breakpad"
 case "$AUTOBUILD_PLATFORM" in
     "windows")

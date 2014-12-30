@@ -5,6 +5,8 @@
     <map>
       <key>copyright</key>
       <string>Copyright (c) 2006, Google Inc.</string>
+      <key>description</key>
+      <string>Breakpad is a crossplatform library for capturing crash callstacks and runtime data.</string>
       <key>license</key>
       <string>BSD</string>
       <key>license_file</key>
@@ -143,12 +145,12 @@
           <string>windows64</string>
         </map>
       </map>
-      <key>version</key>
-      <string>1412</string>
+      <key>version_file</key>
+      <string>VERSION.txt</string>
     </map>
     <key>type</key>
     <string>autobuild</string>
     <key>version</key>
-    <string>1.2</string>
+    <string>1.3</string>
   </map>
 </llsd>
