@@ -253,9 +253,6 @@
       # See http://msdn.microsoft.com/en-us/library/aa652367(VS.71).aspx
       'win_release_RuntimeLibrary%': '2', # 2 = /MT (nondebug dll)
       'win_debug_RuntimeLibrary%': '3',   # 3 = /MTd (debug dll)
-      'win_release_TreatWChar_tAsBuiltInType': 'false',
-      'win_debug_TreatWChar_tAsBuiltInType': 'false',
-
       'release_extra_cflags%': '',
       'debug_extra_cflags%': '',
       'release_valgrind_build%': 0,
@@ -408,7 +405,6 @@
             'BasicRuntimeChecks': '3',
             'DebugInformationFormat': '1',
             'RuntimeLibrary': '<(win_debug_RuntimeLibrary)',
-            'TreatWChar_tAsBuiltInType': '<(win_debug_TreatWChar_tAsBuiltInType)',
           },
           'VCLinkerTool': {
             'LinkIncremental': '<(msvs_debug_link_incremental)',
@@ -447,7 +443,6 @@
             'Optimization': '<(win_release_Optimization)',
             'DebugInformationFormat': '1',
             'RuntimeLibrary': '<(win_release_RuntimeLibrary)',
-            'TreatWChar_tAsBuiltInType': '<(win_release_TreatWChar_tAsBuiltInType)',
           },
           'VCLinkerTool': {
             'LinkIncremental': '1',
