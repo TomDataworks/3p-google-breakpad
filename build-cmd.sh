@@ -21,7 +21,7 @@ set +x
 eval "$("$AUTOBUILD" source_environment)"
 set -x
 
-BREAKPAD_VERSION="1412"
+BREAKPAD_VERSION="1434"
 
 stage="$(pwd)/stage"
 LIBRARY_DIRECTORY_DEBUG=$stage/lib/debug
@@ -144,7 +144,7 @@ case "$AUTOBUILD_PLATFORM" in
     popd
     ;;
     linux64)
-        VIEWER_FLAGS="-m64 -O3 -fno-stack-protector"
+        VIEWER_FLAGS="-m64 -O3"
 
         CFLAGS="$VIEWER_FLAGS" \
         CXXFLAGS="$VIEWER_FLAGS -std=gnu++11" \
