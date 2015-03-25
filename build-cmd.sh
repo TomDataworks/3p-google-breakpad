@@ -21,7 +21,7 @@ set +x
 eval "$("$AUTOBUILD" source_environment)"
 set -x
 
-BREAKPAD_VERSION="1434"
+BREAKPAD_VERSION="1435"
 
 stage="$(pwd)/stage"
 LIBRARY_DIRECTORY_DEBUG=$stage/lib/debug
