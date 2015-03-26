@@ -37,7 +37,7 @@
           </map>
           <key>manifest</key>
           <array>
-            <string>include/*</string>
+            <string>include/google_breakpad/*</string>
           </array>
           <key>name</key>
           <string>common</string>
@@ -86,8 +86,9 @@
           </map>
           <key>manifest</key>
           <array>
-            <string>lib/release/*</string>
-            <string>bin/*</string>
+            <string>lib/debug/libbreakpad_client.a</string>
+            <string>lib/release/libbreakpad_client.a</string>
+            <string>bin/dump_syms</string>
           </array>
           <key>name</key>
           <string>linux64</string>
