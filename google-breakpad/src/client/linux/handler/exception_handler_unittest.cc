@@ -80,7 +80,11 @@ void FlushInstructionCache(const char* memory, uint32_t memory_size) {
   // Provided by Android's <unistd.h>
   long begin = reinterpret_cast<long>(memory);
   long end = begin + static_cast<long>(memory_size);
+#if _MIPS_SIM == _ABIO32
   cacheflush(begin, end, 0);
+#else
+  syscall(__NR_cacheflush, begin, end, ICACHE);
+#endif
 # elif defined(__linux__)
   // See http://www.linux-mips.org/wiki/Cacheflush_Syscall.
   cacheflush(const_cast<char*>(memory), memory_size, ICACHE);
@@ -770,8 +774,13 @@ TEST(ExceptionHandlerTest, InstructionPointerMemoryNullPointer) {
                              true, -1);
     // Try calling a NULL pointer.
     typedef void (*void_function)(void);
-    void_function memory_function = reinterpret_cast<void_function>(NULL);
+    // Volatile markings are needed to keep Clang from generating invalid
+    // opcodes.  See http://crbug.com/498354 for details.
+    volatile void_function memory_function =
+      reinterpret_cast<void_function>(NULL);
     memory_function();
+    // not reached
+    exit(1);
   }
   close(fds[1]);
 
