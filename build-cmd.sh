@@ -40,8 +40,8 @@ pushd "google-breakpad"
 case "$AUTOBUILD_PLATFORM" in
     "windows")
     pushd "src"
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 client/windows/breakpad_client.gyp
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 tools/windows/dump_syms/dump_syms.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2015 client/windows/breakpad_client.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2015 tools/windows/dump_syms/dump_syms.gyp
         
         load_vsvars
 
@@ -76,8 +76,8 @@ case "$AUTOBUILD_PLATFORM" in
     ;;
     "windows64")
     pushd "src"
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 client/windows/breakpad_client.gyp
-        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2013 tools/windows/dump_syms/dump_syms.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2015 client/windows/breakpad_client.gyp
+        tools/gyp/gyp --no-circular-check -f msvs -G msvs_version=2015 tools/windows/dump_syms/dump_syms.gyp
         
         load_vsvars
 
