@@ -1,4 +1,4 @@
-// Copyright (c) 2012, Google Inc.
+// Copyright (c) 2015 Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,50 +27,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Android doesn't provide wcscasecmp(), so provide an alternative here.
+// ntstatus_reason_win.h: Windows NTSTATUS code to string.
 //
-// Note that this header is not needed when Breakpad is compiled against
-// a recent version of Googletest. It shall be considered for removal once
-// src/testing/ is updated to an appropriate revision in the future.
+// Provides a means to convert NTSTATUS codes to strings.
+//
+// Author: Ben Wagner
 
-#ifndef GOOGLEBREAKPAD_COMMON_ANDROID_INCLUDE_WCHAR_H
-#define GOOGLEBREAKPAD_COMMON_ANDROID_INCLUDE_WCHAR_H
+#ifndef GOOGLE_BREAKPAD_PROCESSOR_SYMBOLIC_CONSTANTS_WIN_H_
+#define GOOGLE_BREAKPAD_PROCESSOR_SYMBOLIC_CONSTANTS_WIN_H_
 
-#include_next <wchar.h>
+#include <string>
 
-#if !defined(__aarch64__) && !defined(__x86_64__) && \
-    !(defined(__mips__) && _MIPS_SIM == _ABI64)
+#include "google_breakpad/common/breakpad_types.h"
 
-// This needs to be in an extern "C" namespace, or Googletest will not
-// compile against it.
-#ifdef __cplusplus
-extern "C" {
-#endif  // __cplusplus
+namespace google_breakpad {
 
-static wchar_t inline wcstolower(wchar_t ch) {
-  if (ch >= L'a' && ch <= L'A')
-    ch -= L'a' - L'A';
-  return ch;
-}
+/* Converts a NTSTATUS code to a reason string. */
+std::string NTStatusToString(uint32_t ntstatus);
 
-static int inline wcscasecmp(const wchar_t* s1, const wchar_t* s2) {
-  for (;;) {
-    wchar_t c1 = wcstolower(*s1);
-    wchar_t c2 = wcstolower(*s2);
-    if (c1 < c2)
-      return -1;
-    if (c1 > c2)
-      return 1;
-    if (c1 == L'0')
-      return 0;
-    s1++;
-    s2++;
-  }
-}
+}  // namespace google_breakpad
 
-#ifdef __cplusplus
-}  // extern "C"
-#endif  // __cplusplus
-#endif
-
-#endif  // GOOGLEBREAKPAD_COMMON_ANDROID_INCLUDE_WCHAR_H
+#endif  // GOOGLE_BREAKPAD_PROCESSOR_SYMBOLIC_CONSTANTS_WIN_H_

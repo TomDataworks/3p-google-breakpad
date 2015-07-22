@@ -1,4 +1,4 @@
-// Copyright (c) 2014, Google Inc.
+// Copyright (c) 2015, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,38 +27,62 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CLIENT_LINUX_MINIDUMP_WRITER_MICRODUMP_WRITER_H_
-#define CLIENT_LINUX_MINIDUMP_WRITER_MICRODUMP_WRITER_H_
+// Original author: Erik Chen <erikchen@chromium.org>
 
+// super_fat_arch.h: A class to handle 64-bit object files. Has conversions to
+// and from struct fat_arch.
+
+#ifndef BREAKPAD_COMMON_MAC_SUPER_FAT_ARCH_H_
+#define BREAKPAD_COMMON_MAC_SUPER_FAT_ARCH_H_
+
+#include <limits>
+#include <mach-o/fat.h>
 #include <stdint.h>
-#include <sys/types.h>
 
-#include "client/linux/dump_writer_common/mapping_info.h"
+// Similar to struct fat_arch, except size-related parameters support
+// 64-bits.
+class SuperFatArch {
+ public:
+  uint32_t cputype;
+  uint32_t cpusubtype;
+  uint64_t offset;
+  uint64_t size;
+  uint64_t align;
 
-namespace google_breakpad {
+  SuperFatArch() :
+      cputype(0),
+      cpusubtype(0),
+      offset(0),
+      size(0),
+      align(0) {
+  }
 
-// Writes a microdump (a reduced dump containing only the state of the crashing
-// thread) on the console (logcat on Android). These functions do not malloc nor
-// use libc functions which may. Thus, it can be used in contexts where the
-// state of the heap may be corrupt.
-// Args:
-//   crashing_process: the pid of the crashing process. This must be trusted.
-//   blob: a blob of data from the crashing process. See exception_handler.h
-//   blob_size: the length of |blob| in bytes.
-//   mappings: a list of additional mappings provided by the application.
-//   build_fingerprint: a (optional) C string which determines the OS
-//     build fingerprint (e.g., aosp/occam/mako:5.1.1/LMY47W/1234:eng/dev-keys).
-//   product_info: a (optional) C string which determines the product name and
-//     version (e.g., WebView:42.0.2311.136).
-//
-// Returns true iff successful.
-bool WriteMicrodump(pid_t crashing_process,
-                    const void* blob,
-                    size_t blob_size,
-                    const MappingList& mappings,
-                    const char* build_fingerprint,
-                    const char* product_info);
+  explicit SuperFatArch(const struct fat_arch &arch) :
+      cputype(arch.cputype),
+      cpusubtype(arch.cpusubtype),
+      offset(arch.offset),
+      size(arch.size),
+      align(arch.align) {
+  }
 
-}  // namespace google_breakpad
+  // Returns false if the conversion cannot be made.
+  // If the conversion succeeds, the result is placed in |output_arch|.
+  bool ConvertToFatArch(struct fat_arch* output_arch) const {
+    if (offset > std::numeric_limits<uint32_t>::max())
+      return false;
+    if (size > std::numeric_limits<uint32_t>::max())
+      return false;
+    if (align > std::numeric_limits<uint32_t>::max())
+      return false;
+    struct fat_arch arch;
+    arch.cputype = cputype;
+    arch.cpusubtype = cpusubtype;
+    arch.offset = offset;
+    arch.size = size;
+    arch.align = align;
+    *output_arch = arch;
+    return true;
+  }
+};
 
-#endif  // CLIENT_LINUX_MINIDUMP_WRITER_MICRODUMP_WRITER_H_
+#endif  // BREAKPAD_COMMON_MAC_SUPER_FAT_ARCH_H_
