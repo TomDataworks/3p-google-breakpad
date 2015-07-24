@@ -1,4 +1,14 @@
 syntax: glob
 autobuild-parabuild-bootstrap/
 stage/
-
+*.dylib
+*.o
+*.d
+*.dia
+*.pbxproj
+*/*/*/*/build
+Script-*.sh
+*BuildPhase.make*
+CMakeCache.txt
+cmake_install.cmake
+CMakeOutput.log
