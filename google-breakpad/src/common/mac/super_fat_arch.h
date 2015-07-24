@@ -43,8 +43,8 @@
 // 64-bits.
 class SuperFatArch {
  public:
-  uint32_t cputype;
-  uint32_t cpusubtype;
+  integer_t cputype;
+  integer_t cpusubtype;
   uint64_t offset;
   uint64_t size;
   uint64_t align;
