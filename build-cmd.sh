@@ -123,12 +123,12 @@ case "$AUTOBUILD_PLATFORM" in
             -sdk macosx10.10 -configuration Release
         )
         xcodebuild -project tools/mac/dump_syms/dump_syms.xcodeproj \
-            MACOSX_DEPLOYMENT_TARGET=10.7 \
+            MACOSX_DEPLOYMENT_TARGET=10.8 \
             GCC_VERSION=com.apple.compilers.llvm.clang.1_0 \
             CMAKE_OSX_ARCHITECTURES="i386;x86_64" \
             CLANG_CXX_LIBRARY="libc++" \
             CLANG_CXX_LANGUAGE_STANDARD="c++11" \
-            -sdk macosx10.9 -configuration Release
+            -sdk macosx10.10 -configuration Release
         mkdir -p "$INCLUDE_DIRECTORY/processor"
         mkdir -p "$INCLUDE_DIRECTORY/google_breakpad/common"
         mkdir -p "$INCLUDE_DIRECTORY/client/mac/crash_generation"
