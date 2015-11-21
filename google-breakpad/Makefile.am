@@ -76,12 +76,15 @@ dist_doc_DATA = \
 	INSTALL \
 	LICENSE \
 	NEWS \
-	README
+	README.md
 
 ## Headers
 if LINUX_HOST
 includeclhdir = $(includedir)/$(PACKAGE)/client/linux/handler
 includeclh_HEADERS = $(top_srcdir)/src/client/linux/handler/*.h
+
+includecldwcdir = $(includedir)/$(PACKAGE)/client/linux/dump_writer_common
+includecldwc_HEADERS = $(top_srcdir)/src/client/linux/dump_writer_common/*.h
 
 includeclmdir = $(includedir)/$(PACKAGE)/client/linux/minidump_writer
 includeclm_HEADERS = $(top_srcdir)/src/client/linux/minidump_writer/*.h
@@ -128,7 +131,6 @@ pkgconfig_DATA += breakpad-client.pc
 src_client_linux_libbreakpad_client_a_SOURCES = \
 	src/client/linux/crash_generation/crash_generation_client.cc \
 	src/client/linux/crash_generation/crash_generation_server.cc \
-	src/client/linux/dump_writer_common/seccomp_unwinder.cc \
 	src/client/linux/dump_writer_common/thread_info.cc \
 	src/client/linux/dump_writer_common/ucontext_reader.cc \
 	src/client/linux/handler/exception_handler.cc \
@@ -174,6 +176,7 @@ src_libbreakpad_a_SOURCES = \
 	src/google_breakpad/processor/minidump_processor.h \
 	src/google_breakpad/processor/process_result.h \
 	src/google_breakpad/processor/process_state.h \
+	src/google_breakpad/processor/proc_maps_linux.h \
 	src/google_breakpad/processor/source_line_resolver_base.h \
 	src/google_breakpad/processor/source_line_resolver_interface.h \
 	src/google_breakpad/processor/stack_frame.h \
@@ -189,8 +192,6 @@ src_libbreakpad_a_SOURCES = \
 	src/processor/basic_code_modules.h \
 	src/processor/basic_source_line_resolver_types.h \
 	src/processor/basic_source_line_resolver.cc \
-	src/processor/binarystream.h \
-	src/processor/binarystream.cc \
 	src/processor/call_stack.cc \
 	src/processor/cfi_frame_info.cc \
 	src/processor/cfi_frame_info.h \
@@ -226,6 +227,7 @@ src_libbreakpad_a_SOURCES = \
 	src/processor/postfix_evaluator-inl.h \
 	src/processor/postfix_evaluator.h \
 	src/processor/process_state.cc \
+	src/processor/proc_maps_linux.cc \
 	src/processor/range_map-inl.h \
 	src/processor/range_map.h \
 	src/processor/simple_serializer-inl.h \
@@ -270,8 +272,6 @@ src_libbreakpad_a_SOURCES = \
 	src/processor/symbolic_constants_win.h \
 	src/processor/tokenize.cc \
 	src/processor/tokenize.h
-
-src_libbreakpad_a_LIBADD = src/third_party/libdisasm/libdisasm.a
 
 src_third_party_libdisasm_libdisasm_a_SOURCES = \
 	src/third_party/libdisasm/ia32_implicit.c \
@@ -318,7 +318,8 @@ bin_PROGRAMS += \
 	src/tools/linux/dump_syms/dump_syms \
 	src/tools/linux/md2core/minidump-2-core \
 	src/tools/linux/symupload/minidump_upload \
-	src/tools/linux/symupload/sym_upload
+	src/tools/linux/symupload/sym_upload \
+	src/tools/mac/dump_syms/dump_syms
 endif
 endif LINUX_HOST
 
@@ -328,7 +329,6 @@ if !DISABLE_PROCESSOR
 check_PROGRAMS += \
 	src/common/test_assembler_unittest \
 	src/processor/address_map_unittest \
-	src/processor/binarystream_unittest \
 	src/processor/basic_source_line_resolver_unittest \
 	src/processor/cfi_frame_info_unittest \
 	src/processor/contained_range_map_unittest \
@@ -345,6 +345,7 @@ check_PROGRAMS += \
 	src/processor/static_range_map_unittest \
 	src/processor/pathname_stripper_unittest \
 	src/processor/postfix_evaluator_unittest \
+	src/processor/proc_maps_linux_unittest \
 	src/processor/range_map_unittest \
 	src/processor/stackwalker_amd64_unittest \
 	src/processor/stackwalker_arm_unittest \
@@ -365,6 +366,7 @@ check_PROGRAMS += \
 if !DISABLE_TOOLS
 check_PROGRAMS += \
 	src/common/dumper_unittest \
+	src/common/mac/macho_reader_unittest \
 	src/tools/linux/md2core/minidump_2_core_unittest
 endif
 endif LINUX_HOST
@@ -435,7 +437,8 @@ src_client_linux_linux_client_unittest_shlib_SOURCES = \
 	src/processor/dump_object.cc \
 	src/processor/logging.cc \
 	src/processor/minidump.cc \
-	src/processor/pathname_stripper.cc
+	src/processor/pathname_stripper.cc \
+	src/processor/proc_maps_linux.cc
 if ANDROID_HOST
 src_client_linux_linux_client_unittest_shlib_SOURCES += \
 	src/common/android/breakpad_getcontext.S
@@ -456,7 +459,6 @@ src_client_linux_linux_client_unittest_shlib_LDFLAGS = \
 	-Wl,-h,linux_client_unittest_shlib
 src_client_linux_linux_client_unittest_shlib_LDADD = \
 	src/client/linux/crash_generation/crash_generation_client.o \
-	src/client/linux/dump_writer_common/seccomp_unwinder.o \
 	src/client/linux/dump_writer_common/thread_info.o \
 	src/client/linux/dump_writer_common/ucontext_reader.o \
 	src/client/linux/handler/exception_handler.o \
@@ -547,6 +549,30 @@ src_tools_linux_symupload_sym_upload_SOURCES = \
 	src/tools/linux/symupload/sym_upload.cc
 src_tools_linux_symupload_sym_upload_LDADD = -ldl
 
+src_tools_mac_dump_syms_dump_syms_SOURCES = \
+	src/common/dwarf_cfi_to_module.cc \
+	src/common/dwarf_cu_to_module.cc \
+	src/common/dwarf_line_to_module.cc \
+	src/common/language.cc \
+	src/common/md5.cc \
+	src/common/module.cc \
+	src/common/stabs_reader.cc \
+	src/common/stabs_to_module.cc \
+	src/common/dwarf/bytereader.cc \
+	src/common/dwarf/dwarf2diehandler.cc \
+	src/common/dwarf/dwarf2reader.cc \
+	src/common/mac/arch_utilities.cc \
+	src/common/mac/dump_syms.cc \
+	src/common/mac/file_id.cc \
+	src/common/mac/macho_id.cc \
+	src/common/mac/macho_reader.cc \
+	src/common/mac/macho_utilities.cc \
+	src/common/mac/macho_walker.cc \
+	src/tools/mac/dump_syms/dump_syms_tool.cc
+src_tools_mac_dump_syms_dump_syms_CXXFLAGS= \
+	-I$(top_srcdir)/src/third_party/mac_headers \
+	-DHAVE_MACH_O_NLIST_H
+
 src_common_dumper_unittest_SOURCES = \
 	src/common/byte_cursor_unittest.cc \
 	src/common/dwarf_cfi_to_module.cc \
@@ -602,6 +628,42 @@ src_common_dumper_unittest_CPPFLAGS = \
 	-I$(top_srcdir)/src/testing \
 	$(PTHREAD_CFLAGS)
 src_common_dumper_unittest_LDADD = $(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
+
+src_common_mac_macho_reader_unittest_SOURCES = \
+	src/common/dwarf_cfi_to_module.cc \
+	src/common/dwarf_cu_to_module.cc \
+	src/common/dwarf_line_to_module.cc \
+	src/common/language.cc \
+	src/common/md5.cc \
+	src/common/module.cc \
+	src/common/stabs_reader.cc \
+	src/common/stabs_to_module.cc \
+	src/common/test_assembler.cc \
+	src/common/dwarf/bytereader.cc \
+	src/common/dwarf/cfi_assembler.cc \
+	src/common/dwarf/dwarf2diehandler.cc \
+	src/common/dwarf/dwarf2reader.cc \
+	src/common/mac/arch_utilities.cc \
+	src/common/mac/file_id.cc \
+	src/common/mac/macho_id.cc \
+	src/common/mac/macho_reader.cc \
+	src/common/mac/macho_reader_unittest.cc \
+	src/common/mac/macho_utilities.cc \
+	src/common/mac/macho_walker.cc \
+	src/common/tests/file_utils.cc \
+	src/testing/gtest/src/gtest-all.cc \
+	src/testing/gtest/src/gtest_main.cc \
+	src/testing/src/gmock-all.cc
+src_common_mac_macho_reader_unittest_CPPFLAGS = \
+	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/testing/include \
+	-I$(top_srcdir)/src/testing/gtest/include \
+	-I$(top_srcdir)/src/testing/gtest \
+	-I$(top_srcdir)/src/testing \
+	-I$(top_srcdir)/src/third_party/mac_headers \
+	-DHAVE_MACH_O_NLIST_H \
+	$(PTHREAD_CFLAGS)
+src_common_mac_macho_reader_unittest_LDADD = $(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 endif
 
 src_tools_linux_md2core_minidump_2_core_unittest_SOURCES = \
@@ -626,20 +688,6 @@ src_processor_address_map_unittest_SOURCES = \
 src_processor_address_map_unittest_LDADD = \
 	src/processor/logging.o \
 	src/processor/pathname_stripper.o
-
-src_processor_binarystream_unittest_SOURCES = \
-	src/processor/binarystream_unittest.cc \
-	src/testing/gtest/src/gtest-all.cc \
-	src/testing/src/gmock-all.cc
-src_processor_binarystream_unittest_CPPFLAGS = \
-	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/src/testing/include \
-	-I$(top_srcdir)/src/testing/gtest/include \
-	-I$(top_srcdir)/src/testing/gtest \
-	-I$(top_srcdir)/src/testing
-src_processor_binarystream_unittest_LDADD = \
-	src/processor/binarystream.o \
-	$(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 
 src_processor_basic_source_line_resolver_unittest_SOURCES = \
 	src/processor/basic_source_line_resolver_unittest.cc \
@@ -710,6 +758,7 @@ src_processor_exploitability_unittest_LDADD = \
 	src/processor/logging.o \
 	src/processor/minidump.o \
 	src/processor/pathname_stripper.o \
+	src/processor/proc_maps_linux.o \
 	src/processor/simple_symbol_supplier.o \
 	src/processor/source_line_resolver_base.o \
 	src/processor/stack_frame_cpu.o \
@@ -818,7 +867,7 @@ src_processor_microdump_processor_unittest_LDADD = \
 	src/processor/stackwalker_sparc.o \
 	src/processor/stackwalker_x86.o \
 	src/processor/tokenize.o \
-  	$(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
+	$(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 
 src_processor_minidump_processor_unittest_SOURCES = \
 	src/processor/minidump_processor_unittest.cc \
@@ -846,6 +895,7 @@ src_processor_minidump_processor_unittest_LDADD = \
 	src/processor/minidump.o \
 	src/processor/pathname_stripper.o \
 	src/processor/process_state.o \
+	src/processor/proc_maps_linux.o \
 	src/processor/source_line_resolver_base.o \
 	src/processor/stack_frame_cpu.o \
 	src/processor/stack_frame_symbolizer.o \
@@ -884,6 +934,25 @@ src_processor_minidump_unittest_LDADD = \
 	src/processor/logging.o \
 	src/processor/minidump.o \
 	src/processor/pathname_stripper.o \
+	src/processor/proc_maps_linux.o \
+	$(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
+
+src_processor_proc_maps_linux_unittest_SOURCES = \
+	src/processor/proc_maps_linux.cc \
+	src/processor/proc_maps_linux_unittest.cc \
+	src/testing/gtest/src/gtest-all.cc \
+	src/testing/gtest/src/gtest_main.cc \
+	src/testing/src/gmock-all.cc
+src_processor_proc_maps_linux_unittest_CPPFLAGS = \
+	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/testing/include \
+	-I$(top_srcdir)/src/testing/gtest/include \
+	-I$(top_srcdir)/src/testing/gtest \
+	-I$(top_srcdir)/src/testing
+src_processor_proc_maps_linux_unittest_LDADD = \
+	src/processor/logging.o \
+	src/processor/pathname_stripper.o \
+	src/third_party/libdisasm/libdisasm.a \
 	$(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 
 src_processor_static_address_map_unittest_SOURCES = \
@@ -979,6 +1048,7 @@ src_processor_stackwalker_selftest_LDADD = \
 	src/processor/logging.o \
 	src/processor/minidump.o \
 	src/processor/pathname_stripper.o \
+	src/processor/proc_maps_linux.o \
 	src/processor/source_line_resolver_base.o \
 	src/processor/stack_frame_cpu.o \
 	src/processor/stack_frame_symbolizer.o \
@@ -1135,14 +1205,14 @@ src_processor_minidump_dump_LDADD = \
 	src/processor/dump_object.o \
 	src/processor/logging.o \
 	src/processor/minidump.o \
-	src/processor/pathname_stripper.o
+	src/processor/pathname_stripper.o \
+	src/processor/proc_maps_linux.o
 
 src_processor_microdump_stackwalk_SOURCES = \
 	src/processor/microdump_stackwalk.cc
 src_processor_microdump_stackwalk_LDADD = \
 	src/processor/basic_code_modules.o \
 	src/processor/basic_source_line_resolver.o \
-	src/processor/binarystream.o \
 	src/processor/call_stack.o \
 	src/processor/cfi_frame_info.o \
 	src/processor/disassembler_x86.o \
@@ -1176,7 +1246,6 @@ src_processor_minidump_stackwalk_SOURCES = \
 src_processor_minidump_stackwalk_LDADD = \
 	src/processor/basic_code_modules.o \
 	src/processor/basic_source_line_resolver.o \
-	src/processor/binarystream.o \
 	src/processor/call_stack.o \
 	src/processor/cfi_frame_info.o \
 	src/processor/disassembler_x86.o \
@@ -1190,6 +1259,7 @@ src_processor_minidump_stackwalk_LDADD = \
 	src/processor/minidump_processor.o \
 	src/processor/pathname_stripper.o \
 	src/processor/process_state.o \
+	src/processor/proc_maps_linux.o \
 	src/processor/simple_symbol_supplier.o \
 	src/processor/source_line_resolver_base.o \
 	src/processor/stack_frame_cpu.o \
@@ -1280,7 +1350,7 @@ EXTRA_DIST = \
 	src/common/mac/HTTPMultipartUpload.h \
 	src/common/mac/HTTPMultipartUpload.m \
 	src/common/mac/dump_syms.h \
-	src/common/mac/dump_syms.mm \
+	src/common/mac/dump_syms.cc \
 	src/common/mac/file_id.cc \
 	src/common/mac/file_id.h \
 	src/common/mac/macho_id.cc \
@@ -1332,7 +1402,7 @@ EXTRA_DIST = \
 	src/tools/mac/crash_report/on_demand_symbol_supplier.h \
 	src/tools/mac/crash_report/on_demand_symbol_supplier.mm \
 	src/tools/mac/dump_syms/dump_syms.xcodeproj/project.pbxproj \
-	src/tools/mac/dump_syms/dump_syms_tool.m \
+	src/tools/mac/dump_syms/dump_syms_tool.cc \
 	src/tools/mac/symupload/minidump_upload.m \
 	src/tools/mac/symupload/symupload.m \
 	src/tools/mac/symupload/symupload.xcodeproj/project.pbxproj \

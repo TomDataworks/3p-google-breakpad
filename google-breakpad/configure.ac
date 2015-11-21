@@ -32,7 +32,7 @@ AC_PREREQ(2.57)
 
 AC_INIT(breakpad, 0.1, google-breakpad-dev@googlegroups.com)
 dnl Sanity check: the argument is just a file that should exist.
-AC_CONFIG_SRCDIR(README)
+AC_CONFIG_SRCDIR(README.md)
 AC_CONFIG_AUX_DIR(autotools)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_HOST
@@ -41,6 +41,7 @@ AM_INIT_AUTOMAKE(subdir-objects tar-ustar 1.11.1)
 AM_CONFIG_HEADER(src/config.h)
 AM_MAINTAINER_MODE
 
+AM_PROG_AR
 AM_PROG_AS
 AC_PROG_CC
 AM_PROG_CC_C_O
