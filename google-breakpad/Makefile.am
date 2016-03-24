@@ -318,8 +318,7 @@ bin_PROGRAMS += \
 	src/tools/linux/dump_syms/dump_syms \
 	src/tools/linux/md2core/minidump-2-core \
 	src/tools/linux/symupload/minidump_upload \
-	src/tools/linux/symupload/sym_upload \
-	src/tools/mac/dump_syms/dump_syms
+	src/tools/linux/symupload/sym_upload
 endif
 endif LINUX_HOST
 
@@ -548,30 +547,6 @@ src_tools_linux_symupload_sym_upload_SOURCES = \
 	src/common/linux/http_upload.cc \
 	src/tools/linux/symupload/sym_upload.cc
 src_tools_linux_symupload_sym_upload_LDADD = -ldl
-
-src_tools_mac_dump_syms_dump_syms_SOURCES = \
-	src/common/dwarf_cfi_to_module.cc \
-	src/common/dwarf_cu_to_module.cc \
-	src/common/dwarf_line_to_module.cc \
-	src/common/language.cc \
-	src/common/md5.cc \
-	src/common/module.cc \
-	src/common/stabs_reader.cc \
-	src/common/stabs_to_module.cc \
-	src/common/dwarf/bytereader.cc \
-	src/common/dwarf/dwarf2diehandler.cc \
-	src/common/dwarf/dwarf2reader.cc \
-	src/common/mac/arch_utilities.cc \
-	src/common/mac/dump_syms.cc \
-	src/common/mac/file_id.cc \
-	src/common/mac/macho_id.cc \
-	src/common/mac/macho_reader.cc \
-	src/common/mac/macho_utilities.cc \
-	src/common/mac/macho_walker.cc \
-	src/tools/mac/dump_syms/dump_syms_tool.cc
-src_tools_mac_dump_syms_dump_syms_CXXFLAGS= \
-	-I$(top_srcdir)/src/third_party/mac_headers \
-	-DHAVE_MACH_O_NLIST_H
 
 src_common_dumper_unittest_SOURCES = \
 	src/common/byte_cursor_unittest.cc \

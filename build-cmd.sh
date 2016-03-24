@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cd "$(dirname "$0")"
 
@@ -110,7 +110,7 @@ case "$AUTOBUILD_PLATFORM" in
         cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
     popd
     ;;
-    darwin)
+    "darwin")
     pushd "src"
         (
             cmake -G Xcode CMakeLists.txt
@@ -143,7 +143,7 @@ case "$AUTOBUILD_PLATFORM" in
         cp common/scoped_ptr.h "$INCLUDE_DIRECTORY/common/scoped_ptr.h"
     popd
     ;;
-    linux64)
+    "linux64")
         # Linux build environment at Linden comes pre-polluted with stuff that can
         # seriously damage 3rd-party builds.  Environmental garbage you can expect
         # includes:
