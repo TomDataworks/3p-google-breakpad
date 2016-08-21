@@ -2600,7 +2600,7 @@ def _GetMSBuildGlobalProperties(spec, guid, gyp_file_name):
        ['Keyword', 'Win32Proj'],
        ['RootNamespace', namespace],
        ['IgnoreWarnCompileDuplicatedFilename', 'true'],
-       ['WindowsTargetPlatformVersion', '10.0.10586.0'],
+       ['WindowsTargetPlatformVersion', '10.0.14393.0'],
       ]
   ]
 
