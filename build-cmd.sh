@@ -237,6 +237,100 @@ case "$AUTOBUILD_PLATFORM" in
         cp src/client/linux/handler/minidump_descriptor.h "$INCLUDE_DIRECTORY"
         cp src/client/linux/handler/minidump_descriptor.h "$INCLUDE_DIRECTORY/google_breakpad/"
     ;;
+    "linux")
+        # Linux build environment at Linden comes pre-polluted with stuff that can
+        # seriously damage 3rd-party builds.  Environmental garbage you can expect
+        # includes:
+        #
+        #    DISTCC_POTENTIAL_HOSTS     arch           root        CXXFLAGS
+        #    DISTCC_LOCATION            top            branch      CC
+        #    DISTCC_HOSTS               build_name     suffix      CXX
+        #    LSDISTCC_ARGS              repo           prefix      CFLAGS
+        #    cxx_version                AUTOBUILD      SIGN        CPPFLAGS
+        #
+        # So, clear out bits that shouldn't affect our configure-directed build
+        # but which do nonetheless.
+        #
+        # unset DISTCC_HOSTS CC CXX CFLAGS CPPFLAGS CXXFLAGS
+
+        # Default target to 64-bit
+        opts="${TARGET_OPTS:--m32}"
+        # Hardened toolchain flags
+        HARDENED="-fstack-protector -D_FORTIFY_SOURCE=2"
+        # Number of cpu cores for build
+        JOBS=`cat /proc/cpuinfo | grep processor | wc -l`
+
+        # Handle any deliberate platform targeting
+        if [ -z "$TARGET_CPPFLAGS" ]; then
+            # Remove sysroot contamination from build environment
+            unset CPPFLAGS
+        else
+            # Incorporate special pre-processing flags
+            export CPPFLAGS="$TARGET_CPPFLAGS"
+        fi
+
+        # Debug first
+        CFLAGS="$opts -Og -g -fPIC -DPIC" CXXFLAGS="$opts -Og -g -std=c++11 -fPIC -DPIC" \
+             ./configure --prefix="$stage" --libdir="$stage/lib/debug"
+        make -j$JOBS
+        make install
+
+        # conditionally run unit tests
+        if [ "${DISABLE_UNIT_TESTS:-0}" = "0" ]; then
+            make check -j$JOBS
+        fi
+
+        # clean the build artifacts
+        make distclean
+
+        # Release last
+        CFLAGS="$opts -O3 -g $HARDENED -fPIC -DPIC" CXXFLAGS="$opts -O3 -g -std=c++11 $HARDENED -fPIC -DPIC" \
+             ./configure --prefix="$stage" --libdir="$stage/lib/release"
+        make -j$JOBS
+        make install
+
+        # conditionally run unit tests
+        if [ "${DISABLE_UNIT_TESTS:-0}" = "0" ]; then
+            make check -j$JOBS
+        fi
+
+        # clean the build artifacts
+        make distclean
+
+        # strip binaries
+        strip -S $BINARY_DIRECTORY/dump_syms
+
+        # include directories
+        mkdir -p "$INCLUDE_DIRECTORY/processor"
+        mkdir -p "$INCLUDE_DIRECTORY/common"
+        mkdir -p "$INCLUDE_DIRECTORY/google_breakpad/common"
+        mkdir -p "$INCLUDE_DIRECTORY/client/linux/handler"
+        mkdir -p "$INCLUDE_DIRECTORY/client/linux/crash_generation"
+        mkdir -p "$INCLUDE_DIRECTORY/client/linux/dump_writer_common"
+        mkdir -p "$INCLUDE_DIRECTORY/client/linux/minidump_writer"
+        mkdir -p "$INCLUDE_DIRECTORY/client/linux/log"
+        mkdir -p "$INCLUDE_DIRECTORY/third_party/lss"
+
+        # replicate breakpad headers
+        cp src/common/*.h "$INCLUDE_DIRECTORY/common"
+        cp src/google_breakpad/common/*.h "$INCLUDE_DIRECTORY/google_breakpad/common"
+
+        # no really all of them
+        cp src/client/linux/crash_generation/*.h "$INCLUDE_DIRECTORY/client/linux/crash_generation/"
+        cp src/client/linux/handler/*.h "$INCLUDE_DIRECTORY/client/linux/handler/"
+        cp src/client/linux/dump_writer_common/*.h "$INCLUDE_DIRECTORY/client/linux/dump_writer_common/"
+        cp src/client/linux/minidump_writer/*.h "$INCLUDE_DIRECTORY/client/linux/minidump_writer/"
+        cp src/client/linux/log/*.h "$INCLUDE_DIRECTORY/client/linux/log/"
+        cp src/third_party/lss/* "$INCLUDE_DIRECTORY/third_party/lss/"
+
+        # and then cherry-pick some so they are found as used by linden
+        cp src/client/linux/handler/*.h "$INCLUDE_DIRECTORY"
+        cp src/common/using_std_string.h "$INCLUDE_DIRECTORY"
+        cp src/client/linux/handler/exception_handler.h "$INCLUDE_DIRECTORY"
+        cp src/client/linux/handler/exception_handler.h "$INCLUDE_DIRECTORY/google_breakpad/"
+        cp src/client/linux/handler/minidump_descriptor.h "$INCLUDE_DIRECTORY"
+        cp src/client/linux/handler/minidump_descriptor.h "$INCLUDE_DIRECTORY/google_breakpad/"
+    ;;
 esac
 
 mkdir -p $stage/LICENSES

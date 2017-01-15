@@ -93,6 +93,32 @@
           <key>name</key>
           <string>linux64</string>
         </map>
+        <key>linux</key>
+        <map>
+          <key>build_directory</key>
+          <string>stage</string>
+          <key>configurations</key>
+          <map>
+            <key>default</key>
+            <map>
+              <key>build</key>
+              <map>
+              </map>
+              <key>default</key>
+              <string>true</string>
+              <key>name</key>
+              <string>default</string>
+            </map>
+          </map>
+          <key>manifest</key>
+          <array>
+            <string>lib/debug/libbreakpad_client.a</string>
+            <string>lib/release/libbreakpad_client.a</string>
+            <string>bin/dump_syms</string>
+          </array>
+          <key>name</key>
+          <string>linux</string>
+        </map>
         <key>windows</key>
         <map>
           <key>build_directory</key>
